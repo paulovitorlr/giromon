@@ -1,0 +1,11 @@
+﻿using Giromon.Application.Abstractions.Security;
+
+namespace Giromon.Infrastructure.Security;
+
+public class BCryptPasswordHasher : IPasswordHasher
+{
+    public string Hash(string password)
+    {
+        return BCrypt.Net.BCrypt.HashPassword(password);
+    }
+}

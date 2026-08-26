@@ -1,19 +1,19 @@
-using Giromon.Api.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using Giromon.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "Frontend";
 
-var connectionString = builder.Configuration.GetConnectionString("Postgres")
-    ?? throw new InvalidOperationException("Connection string 'Postgres' não configurada.");
+var connectionString =
+    builder.Configuration.GetConnectionString("Postgres")
+    ?? throw new InvalidOperationException(
+        "Connection string 'Postgres' não configurada.");
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>() ?? ["http://localhost:4200"];
 
-builder.Services.AddDbContext<GiromonDbContext>(options =>
-    options.UseNpgsql(connectionString));
+builder.Services.AddInfrastructure(connectionString);
 
 builder.Services.AddCors(options =>
 {
@@ -37,7 +37,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(frontendCorsPolicy);
+
 app.MapControllers();
+
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
@@ -48,4 +50,3 @@ app.MapGet("/health", () => Results.Ok(new
 app.Run();
 
 public partial class Program;
-

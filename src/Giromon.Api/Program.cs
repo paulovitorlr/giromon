@@ -1,3 +1,4 @@
+using Giromon.Application.Users.Register;
 using Giromon.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ var allowedOrigins = builder.Configuration
     .Get<string[]>() ?? ["http://localhost:4200"];
 
 builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddScoped<RegisterUserUseCase>();
 
 builder.Services.AddCors(options =>
 {

@@ -38,4 +38,15 @@ public class Wallet
             0m,
             DateTime.UtcNow);
     }
+
+    public WalletTransaction Deposit(decimal amount)
+    {
+        var transaction = WalletTransaction.CreateDeposit(
+            Id,
+            amount);
+
+        Balance += amount;
+
+        return transaction;
+    }
 }

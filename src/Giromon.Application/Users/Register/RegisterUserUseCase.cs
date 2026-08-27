@@ -7,13 +7,19 @@ namespace Giromon.Application.Users.Register;
 public sealed class RegisterUserUseCase
 {
     private readonly IUserRepository _userRepository;
+    private readonly IWalletRepository _walletRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
 
     public RegisterUserUseCase(
         IUserRepository userRepository,
+        IWalletRepository walletRepository,
+        IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
+        _walletRepository = walletRepository;
+        _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
     }
 
@@ -47,7 +53,17 @@ public sealed class RegisterUserUseCase
             normalizedEmail,
             passwordHash);
 
-        await _userRepository.AddAsync(user, cancellationToken);
+        var wallet = Wallet.Create(user.Id);
+
+        await _userRepository.AddAsync(
+            user,
+            cancellationToken);
+
+        await _walletRepository.AddAsync(
+            wallet,
+            cancellationToken);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new RegisterUserResult(
             user.Id,

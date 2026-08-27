@@ -23,14 +23,23 @@ public class UserRepository : IUserRepository
                 cancellationToken);
     }
 
-    public async Task AddAsync(
-        User user,
+    public async Task<User?> GetByEmailAsync(
+        string email,
         CancellationToken cancellationToken = default)
+    {
+            return await _dbContext.Users
+                .AsNoTracking()
+                .SingleOrDefaultAsync(
+                    user => user.Email == email,
+                    cancellationToken);
+    }
+
+    public async Task AddAsync(
+    User user,
+    CancellationToken cancellationToken = default)
     {
         await _dbContext.Users.AddAsync(
             user,
             cancellationToken);
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

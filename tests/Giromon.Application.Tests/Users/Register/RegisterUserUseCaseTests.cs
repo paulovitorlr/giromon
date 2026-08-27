@@ -8,12 +8,17 @@ namespace Giromon.Application.Tests.Users.Register;
 public class RegisterUserUseCaseTests
 {
     [Fact]
-    public async Task ExecuteAsync_ShouldRegisterUser()
+    public async Task ExecuteAsync_ShouldRegisterUserAndCreateWallet()
     {
-        var repository = new FakeUserRepository();
+        var userRepository = new FakeUserRepository();
+        var walletRepository = new FakeWalletRepository();
+        var unitOfWork = new FakeUnitOfWork();
         var passwordHasher = new FakePasswordHasher();
+
         var useCase = new RegisterUserUseCase(
-            repository,
+            userRepository,
+            walletRepository,
+            unitOfWork,
             passwordHasher);
 
         var command = new RegisterUserCommand(
@@ -23,28 +28,37 @@ public class RegisterUserUseCaseTests
 
         var result = await useCase.ExecuteAsync(command);
 
-        var savedUser = Assert.Single(repository.Users);
+        var savedUser = Assert.Single(userRepository.Users);
+        var savedWallet = Assert.Single(walletRepository.Wallets);
 
         Assert.Equal(savedUser.Id, result.Id);
         Assert.Equal("Paulo", result.Name);
         Assert.Equal("paulo@email.com", result.Email);
         Assert.Equal("hashed:senha123", savedUser.PasswordHash);
+
+        Assert.Equal(savedUser.Id, savedWallet.UserId);
+        Assert.Equal(0m, savedWallet.Balance);
+        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldThrow_WhenEmailAlreadyExists()
     {
-        var repository = new FakeUserRepository();
+        var userRepository = new FakeUserRepository();
+        var walletRepository = new FakeWalletRepository();
+        var unitOfWork = new FakeUnitOfWork();
         var passwordHasher = new FakePasswordHasher();
 
-        repository.Users.Add(
+        userRepository.Users.Add(
             User.Create(
                 "Usuário existente",
                 "paulo@email.com",
                 "existing-hash"));
 
         var useCase = new RegisterUserUseCase(
-            repository,
+            userRepository,
+            walletRepository,
+            unitOfWork,
             passwordHasher);
 
         var command = new RegisterUserCommand(
@@ -55,17 +69,24 @@ public class RegisterUserUseCaseTests
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(
             () => useCase.ExecuteAsync(command));
 
-        Assert.Single(repository.Users);
+        Assert.Single(userRepository.Users);
+        Assert.Empty(walletRepository.Wallets);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
         Assert.Equal(0, passwordHasher.HashCallCount);
     }
 
     [Fact]
     public async Task ExecuteAsync_ShouldThrow_WhenPasswordIsEmpty()
     {
-        var repository = new FakeUserRepository();
+        var userRepository = new FakeUserRepository();
+        var walletRepository = new FakeWalletRepository();
+        var unitOfWork = new FakeUnitOfWork();
         var passwordHasher = new FakePasswordHasher();
+
         var useCase = new RegisterUserUseCase(
-            repository,
+            userRepository,
+            walletRepository,
+            unitOfWork,
             passwordHasher);
 
         var command = new RegisterUserCommand(
@@ -76,7 +97,9 @@ public class RegisterUserUseCaseTests
         await Assert.ThrowsAsync<ArgumentException>(
             () => useCase.ExecuteAsync(command));
 
-        Assert.Empty(repository.Users);
+        Assert.Empty(userRepository.Users);
+        Assert.Empty(walletRepository.Wallets);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
         Assert.Equal(0, passwordHasher.HashCallCount);
     }
 
@@ -96,6 +119,18 @@ public class RegisterUserUseCaseTests
             return Task.FromResult(exists);
         }
 
+        public Task<User?> GetByEmailAsync(
+            string email,
+            CancellationToken cancellationToken = default)
+        {
+            var user = Users.SingleOrDefault(
+                user => user.Email.Equals(
+                    email,
+                    StringComparison.OrdinalIgnoreCase));
+
+            return Task.FromResult(user);
+        }
+
         public Task AddAsync(
             User user,
             CancellationToken cancellationToken = default)
@@ -103,6 +138,43 @@ public class RegisterUserUseCaseTests
             Users.Add(user);
 
             return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeWalletRepository : IWalletRepository
+    {
+        public List<Wallet> Wallets { get; } = [];
+
+        public Task<Wallet?> GetByUserIdAsync(
+            Guid userId,
+            CancellationToken cancellationToken = default)
+        {
+            var wallet = Wallets.SingleOrDefault(
+                wallet => wallet.UserId == userId);
+
+            return Task.FromResult(wallet);
+        }
+
+        public Task AddAsync(
+            Wallet wallet,
+            CancellationToken cancellationToken = default)
+        {
+            Wallets.Add(wallet);
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeUnitOfWork : IUnitOfWork
+    {
+        public int SaveChangesCallCount { get; private set; }
+
+        public Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            SaveChangesCallCount++;
+
+            return Task.FromResult(1);
         }
     }
 
@@ -115,6 +187,13 @@ public class RegisterUserUseCaseTests
             HashCallCount++;
 
             return $"hashed:{password}";
+        }
+
+        public bool Verify(
+            string password,
+            string passwordHash)
+        {
+            return passwordHash == $"hashed:{password}";
         }
     }
 }

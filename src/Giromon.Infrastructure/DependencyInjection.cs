@@ -18,6 +18,13 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString));
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IWalletTransactionRepository,WalletTransactionRepository>();
+
+        services.AddScoped<IUnitOfWork>(
+            serviceProvider =>
+                serviceProvider.GetRequiredService<GiromonDbContext>());
+
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
         return services;

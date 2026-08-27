@@ -1,9 +1,10 @@
-﻿using Giromon.Domain.Entities;
+﻿using Giromon.Application.Abstractions.Persistence;
+using Giromon.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Giromon.Infrastructure.Persistence;
 
-public class GiromonDbContext : DbContext
+public class GiromonDbContext : DbContext, IUnitOfWork
 {
     public GiromonDbContext(
         DbContextOptions<GiromonDbContext> options)
@@ -12,6 +13,9 @@ public class GiromonDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Wallet> Wallets => Set<Wallet>();
+    public DbSet<WalletTransaction> WalletTransactions =>
+        Set<WalletTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

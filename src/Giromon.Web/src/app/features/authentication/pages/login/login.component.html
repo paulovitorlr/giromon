@@ -1,0 +1,30 @@
+<main class="auth-page">
+  <section class="auth-visual">
+    <app-brand />
+    <div class="visual-copy">
+      <p class="eyebrow"><span></span> A arena está aberta</p>
+      <h1>Capture<br><em>a sorte.</em></h1>
+      <p>Monte sua aposta, combine os elementos e descubra qual Giromon vai aparecer.</p>
+    </div>
+    <div class="creature" aria-hidden="true"><div class="ear left"></div><div class="ear right"></div><div class="face"><i></i><i></i><span></span></div><div class="spark">ϟ</div></div>
+    <p class="visual-note">Jogue com créditos fictícios. Diversão sem riscos.</p>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-card">
+      <p class="step">ACESSO DO TREINADOR</p>
+      <h2>Boas-vindas de volta!</h2>
+      <p class="subtitle">Entre para continuar sua jornada.</p>
+      @if (errorMessage()) { <div class="alert" role="alert">{{ errorMessage() }}</div> }
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <label for="email">E-mail</label>
+        <div class="field"><span>✉</span><input id="email" type="email" formControlName="email" placeholder="voce@email.com" autocomplete="email"></div>
+        @if (form.controls.email.touched && form.controls.email.invalid) { <small>Informe um e-mail válido.</small> }
+        <label for="password">Senha</label>
+        <div class="field"><span>◆</span><input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="Sua senha" autocomplete="current-password"><button type="button" (click)="showPassword.set(!showPassword())" aria-label="Mostrar ou ocultar senha">◉</button></div>
+        @if (form.controls.password.touched && form.controls.password.invalid) { <small>A senha deve ter pelo menos 6 caracteres.</small> }
+        <button class="primary" type="submit" [disabled]="isLoading()">{{ isLoading() ? 'ENTRANDO...' : 'ENTRAR NA ARENA' }} <span>→</span></button>
+      </form>
+      <p class="switch">Ainda não tem uma conta? <a routerLink="/criar-conta">Comece agora</a></p>
+    </div>
+  </section>
+</main>

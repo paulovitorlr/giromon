@@ -1,0 +1,5 @@
+<div class="reels" [class.spinning]="spinning()">
+  @for (symbol of symbols(); track $index) {
+    <div class="reel"><div class="symbol" [class]="symbolMap[symbol].className"><span>{{ symbolMap[symbol].icon }}</span><b>{{ symbolMap[symbol].label }}</b></div></div>
+  }
+</div>

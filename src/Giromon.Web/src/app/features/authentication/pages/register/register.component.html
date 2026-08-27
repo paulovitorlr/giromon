@@ -1,0 +1,30 @@
+<main class="auth-page">
+  <section class="auth-visual register-visual">
+    <app-brand />
+    <div class="visual-copy">
+      <p class="eyebrow"><span></span> Sua jornada começa aqui</p>
+      <h1>Entre para<br><em>o time.</em></h1>
+      <p>Crie seu perfil, receba créditos de teste e encare a máquina elemental.</p>
+    </div>
+    <div class="creature blue" aria-hidden="true"><div class="ear left"></div><div class="ear right"></div><div class="face"><i></i><i></i><span></span></div><div class="spark">✦</div></div>
+    <p class="visual-note">Um protótipo para demonstração. Nenhum dinheiro real envolvido.</p>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-card">
+      <p class="step">NOVO TREINADOR</p>
+      <h2>Crie sua conta</h2>
+      <p class="subtitle">Leva menos de um minuto.</p>
+      @if (errorMessage()) { <div class="alert" role="alert">{{ errorMessage() }}</div> }
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <label for="name">Nome</label><div class="field"><span>●</span><input id="name" formControlName="name" placeholder="Como quer ser chamado?" autocomplete="name"></div>
+        @if (form.controls.name.touched && form.controls.name.invalid) { <small>Informe seu nome.</small> }
+        <label for="email">E-mail</label><div class="field"><span>✉</span><input id="email" type="email" formControlName="email" placeholder="voce@email.com" autocomplete="email"></div>
+        @if (form.controls.email.touched && form.controls.email.invalid) { <small>Informe um e-mail válido.</small> }
+        <label for="password">Senha</label><div class="field"><span>◆</span><input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="Mínimo de 6 caracteres" autocomplete="new-password"><button type="button" (click)="showPassword.set(!showPassword())">◉</button></div>
+        @if (form.controls.password.touched && form.controls.password.invalid) { <small>A senha deve ter pelo menos 6 caracteres.</small> }
+        <button class="primary" type="submit" [disabled]="isLoading()">{{ isLoading() ? 'CRIANDO...' : 'CRIAR CONTA' }} <span>→</span></button>
+      </form>
+      <p class="switch">Já tem uma conta? <a routerLink="/entrar">Entrar</a></p>
+    </div>
+  </section>
+</main>

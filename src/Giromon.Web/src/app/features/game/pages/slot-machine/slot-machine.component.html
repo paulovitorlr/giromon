@@ -1,0 +1,48 @@
+<div class="game-shell">
+  <header>
+    <app-brand />
+    <nav aria-label="Navegação principal"><button class="active">Arena</button><button (click)="showHistory.set(true)">Histórico</button></nav>
+    <div class="player">
+      <div class="balance"><span>SEU SALDO</span><b>{{ gameStore.balance() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</b></div>
+      <button class="add" (click)="showDeposit.set(true)" aria-label="Adicionar créditos">+</button>
+      <div class="avatar">{{ authStore.playerName().charAt(0).toUpperCase() }}</div>
+      <button class="logout" (click)="logout()" title="Sair">↗</button>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="kicker">● ARENA ELEMENTAL</p>
+      <h1>Acerte a combinação.<br><em>Domine os elementos.</em></h1>
+      <p>Três símbolos iguais liberam o prêmio. Quanto mais raro, maior o multiplicador.</p>
+    </section>
+    <section class="machine-grid">
+      <div class="machine">
+        <div class="machine-top"><span>GIROMON</span><small>ELEMENTAL SLOTS</small><div class="lights"><i></i><i></i><i></i></div></div>
+        <app-slot-reels [symbols]="currentSymbols()" [spinning]="gameStore.isSpinning()" />
+        @if (gameStore.result() && !gameStore.isSpinning()) {
+          <div class="result" [class.win]="gameStore.hasWon()">
+            @if (gameStore.hasWon()) { <b>✦ VOCÊ VENCEU {{ gameStore.result()!.prizeAmount | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}!</b><span>Combinação elemental capturada.</span> }
+            @else { <b>QUASE LÁ!</b><span>Os elementos não combinaram desta vez.</span> }
+          </div>
+        }
+        <div class="controls">
+          <div><span>VALOR DA APOSTA</span><div class="bet-options">@for (option of betOptions; track option) { <button [class.selected]="bet() === option" (click)="chooseBet(option)">{{ option }}</button> }</div></div>
+          <button class="spin" (click)="play()" [disabled]="gameStore.isSpinning() || gameStore.balance() < bet()"><span>{{ gameStore.isSpinning() ? 'GIRANDO' : 'GIRAR' }}</span><small>{{ bet() }} créditos</small></button>
+        </div>
+        @if (gameStore.balance() < bet()) { <p class="no-balance">Saldo insuficiente. Adicione créditos para continuar.</p> }
+      </div>
+      <aside>
+        <div class="trainer-card"><div class="trainer-avatar">{{ authStore.playerName().charAt(0).toUpperCase() }}</div><div><small>TREINADOR</small><b>{{ authStore.playerName() }}</b></div><span>ONLINE</span></div>
+        <div class="paytable">
+          <div class="card-title"><span>TABELA DE PRÊMIOS</span><small>3 IGUAIS</small></div>
+          @for (item of symbolMap | keyvalue; track item.key) { <div class="pay-row"><i [class]="item.value.className">{{ item.value.icon }}</i><div><b>{{ item.value.label }}</b><small>{{ item.key }}</small></div><strong>{{ item.value.multiplier }}</strong></div> }
+        </div>
+        <div class="tip"><span>✦</span><div><b>DICA DO MESTRE</b><p>O símbolo Mestre paga o maior prêmio: vinte vezes sua aposta.</p></div></div>
+      </aside>
+    </section>
+  </main>
+  <footer><span>GIROMON • PROTÓTIPO DEMONSTRATIVO</span><span>Créditos fictícios · Nenhuma aposta real</span></footer>
+  @if (gameStore.message()) { <button class="toast" (click)="gameStore.clearMessage()">{{ gameStore.message() }} <span>×</span></button> }
+  @if (showDeposit()) { <div class="overlay" (click)="showDeposit.set(false)"><section class="modal" (click)="$event.stopPropagation()"><button class="close" (click)="showDeposit.set(false)">×</button><p class="kicker">CARTEIRA</p><h2>Adicionar créditos</h2><p>Escolha um pacote fictício para continuar jogando.</p><div class="packages"><button (click)="deposit(50)"><b>50</b><span>créditos</span></button><button class="featured" (click)="deposit(100)"><small>POPULAR</small><b>100</b><span>créditos</span></button><button (click)="deposit(250)"><b>250</b><span>créditos</span></button></div></section></div> }
+  @if (showHistory()) { <div class="overlay" (click)="showHistory.set(false)"><section class="modal history" (click)="$event.stopPropagation()"><button class="close" (click)="showHistory.set(false)">×</button><p class="kicker">CARTEIRA</p><h2>Histórico recente</h2><div class="transactions">@for (transaction of gameStore.transactions(); track transaction.id) { <div><span [class]="transaction.type.toLowerCase()">{{ transaction.type === 'Deposit' ? '+' : transaction.type === 'Prize' ? '+' : '−' }}</span><p><b>{{ transactionLabel(transaction.type) }}</b><small>{{ transaction.createdAt | date:'dd/MM/yyyy, HH:mm' }}</small></p><strong>{{ transaction.amount | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong></div> } @empty { <p>Nenhuma movimentação ainda.</p> }</div></section></div> }
+</div>

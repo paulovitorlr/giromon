@@ -10,6 +10,7 @@ using Giromon.Application.Wallets.GetTransactions;
 using Giromon.Application.Wallets.GetWallet;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using Giromon.Application.Games.PlaySlot;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,7 @@ builder.Services.AddScoped<LoginUseCase>();
 builder.Services.AddScoped<DepositUseCase>();
 builder.Services.AddScoped<GetWalletUseCase>();
 builder.Services.AddScoped<GetWalletTransactionsUseCase>();
+builder.Services.AddScoped<PlaySlotUseCase>();
 
 builder.Services
     .AddAuthentication(

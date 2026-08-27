@@ -6,7 +6,7 @@ using Giromon.Application.Wallets.GetTransactions;
 using Giromon.Application.Wallets.GetWallet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+
 
 namespace Giromon.Api.Controllers;
 

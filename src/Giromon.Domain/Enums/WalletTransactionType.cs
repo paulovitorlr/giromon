@@ -2,5 +2,7 @@
 
 public enum WalletTransactionType
 {
-    Deposit = 1
+    Deposit = 1,
+    Bet = 2,
+    Prize = 3
 }

@@ -49,4 +49,39 @@ public class Wallet
 
         return transaction;
     }
+
+    public WalletTransaction Bet(decimal amount)
+    {
+        if (amount <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(amount),
+                "O valor da aposta deve ser maior que zero.");
+        }
+
+        if (amount > Balance)
+        {
+            throw new InvalidOperationException(
+                "Saldo insuficiente para realizar a aposta.");
+        }
+
+        var transaction = WalletTransaction.CreateBet(
+            Id,
+            amount);
+
+        Balance -= amount;
+
+        return transaction;
+    }
+
+    public WalletTransaction CreditPrize(decimal amount)
+    {
+        var transaction = WalletTransaction.CreatePrize(
+            Id,
+            amount);
+
+        Balance += amount;
+
+        return transaction;
+    }
 }

@@ -12,7 +12,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        string connectionString)
+        string connectionString,
+        JwtSettings jwtSettings)
     {
         services.AddDbContext<GiromonDbContext>(options =>
             options.UseNpgsql(connectionString));
@@ -26,6 +27,12 @@ public static class DependencyInjection
                 serviceProvider.GetRequiredService<GiromonDbContext>());
 
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+
+        services.AddSingleton(jwtSettings);
+
+        services.AddScoped<
+            IAccessTokenGenerator,
+            JwtAccessTokenGenerator>();
 
         return services;
     }

@@ -16,6 +16,7 @@ public class GiromonDbContext : DbContext, IUnitOfWork
     public DbSet<Wallet> Wallets => Set<Wallet>();
     public DbSet<WalletTransaction> WalletTransactions =>
         Set<WalletTransaction>();
+    public DbSet<GameRound> GameRounds => Set<GameRound>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

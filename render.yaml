@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: giromon-api-pvlr
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__Postgres
+        sync: false
+      - key: Jwt__Issuer
+        value: Giromon.Api
+      - key: Jwt__Audience
+        value: Giromon.Web
+      - key: Jwt__Secret
+        generateValue: true
+      - key: Cors__AllowedOrigins__0
+        value: https://giromon-web-pvlr.onrender.com
+
+  - type: web
+    name: giromon-web-pvlr
+    runtime: static
+    buildCommand: cd src/Giromon.Web && npm ci && npm run build
+    staticPublishPath: ./src/Giromon.Web/dist/giromon-web/browser
+    autoDeployTrigger: commit
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

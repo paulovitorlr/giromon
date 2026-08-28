@@ -11,6 +11,8 @@ using Giromon.Application.Wallets.GetWallet;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using Giromon.Application.Games.PlaySlot;
+using Giromon.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -123,6 +125,17 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+// Mantém o banco de produção alinhado com as migrations do projeto.
+// Como o MVP usa apenas uma instância da API, a migração no startup é segura
+// e elimina uma etapa manual durante o deploy.
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<GiromonDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {

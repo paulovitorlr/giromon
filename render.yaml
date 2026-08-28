@@ -17,6 +17,8 @@ services:
         value: Giromon.Web
       - key: Jwt__Secret
         generateValue: true
+      - key: Jwt__ExpirationInMinutes
+        value: 1440
       - key: Cors__AllowedOrigins__0
         value: https://giromon-web-pvlr.onrender.com
 
